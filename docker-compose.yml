@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  nodejs-todo:
+    build: .
+    container_name: nodejs-todo-container
+    ports:
+      - "3000:3000"  # Map port 3000 on the host to port 3000 on the container
+    volumes:
+      - .:/usr/src/app  # Mount the current directory to /usr/src/app inside the container
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+    restart: always
+
+  mysql:
+    image: mysql:latest  # Use the latest version of MySQL
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw  # Set MySQL root password
+      MYSQL_DATABASE: mydb  # Set the name of the database
+    ports:
+      - "3306:3306"  # Expose MySQL's port
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persist data in a named volume
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge  # Default network driver
+
+volumes:
+  mysql-data:
+    driver: local  # Persist MySQL data
+

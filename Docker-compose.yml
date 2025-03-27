@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Node.js Todo app service
+  nodejs-todo:
+    build: .
+    container_name: nodejs-todo-container
+    image: nodejs-todo  # Set the image name to 'nodejs-todo'
+    ports:
+      - "3000:3000"  # Map host port 3000 to container port 3000
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql-db
+      - DB_USER=root
+      - DB_PASSWORD=my-secret-pw
+      - DB_NAME=mydb
+    volumes:
+      - .:/usr/src/app  # Mount the app code into the container
+    networks:
+      - app-network
+    restart: always
+    depends_on:
+      - mysql
+
+  # MySQL Database container
+  mysql:
+    image: mysql:latest
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: mydb
+    ports:
+      - "3306:3306"  # Expose MySQL port
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persist database data
+    networks:
+      - app-network
+    restart: always
+
+  # Pulse container (now named dilip)
+  dilip:
+    image: dilip # Replace with your actual image name if needed
+    container_name: dilip
+    ports:
+      - "8080:80"  # Map host port 8080 to container port 80
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+
