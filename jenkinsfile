@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/dilip-eng/todo.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh """
+                    docker build -t myimage .
+                """
+            }
+        }
+
+        stage('Push') {
+            steps {
+                script {
+                    
+                    withCredentials([usernamePassword(credentialsId: 'dilip', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+                            docker push ${DOCKER_USERNAME}/myimage
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh """
+                    /usr/bin/docker run -d -P myimage
+                """
+            }
+        }
+    }
+}
